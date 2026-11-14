@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Obelisk Companion</string>
+    <string name="accessibility_service_description">Reads the visible Idle Obelisk Miner screen with on-device text recognition and performs only the taps you configure while the game is in the foreground. All screenshots and settings stay on this device.</string>
+</resources>

@@ -16,3 +16,9 @@ screenshots/
 .opencode-web/
 
 node_modules/
+
+# Gradle and Android build outputs
+.gradle/
+**/build/
+local.properties
+*.iml
