@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#090d17">
+  <link rel="icon" href="data:,">
+  <title>Obelisk Protocol — Idle Miner</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="#" aria-label="Obelisk Protocol home">
+        <span class="brand-mark"><span></span><span></span><span></span></span>
+        <span>OBELISK <b>PROTOCOL</b></span>
+      </a>
+      <div class="top-meta"><span class="live-dot"></span><span>SECTOR 07 · DEEP SPACE</span><span class="separator">/</span><span id="save-status">SAVED LOCALLY</span></div>
+      <button class="icon-button" id="sound-toggle" aria-label="Toggle sound" title="Sound effects">◖</button>
+    </header>
+
+    <main>
+      <section class="intro-row">
+        <div>
+          <div class="eyebrow">INCREMENTAL MINING SIMULATOR <span class="eyebrow-line"></span></div>
+          <h1>The Obelisk <span>won't mine itself.</span></h1>
+        </div>
+        <div class="cycle-pill"><span class="cycle-icon">↻</span><span>RUN <b id="run-number">01</b></span></div>
+      </section>
+
+      <section class="resource-strip" aria-label="Resources">
+        <div class="resource-main">
+          <div class="resource-icon ore-icon">✦</div>
+          <div><div class="resource-label">STELLAR ORE <span class="tiny-tag">PRIMARY</span></div><div class="resource-amount" id="ore-count">0</div></div>
+          <div class="resource-rate"><span class="rate-arrow">↗</span><span id="ore-rate">0</span><small>ORE / SEC</small></div>
+        </div>
+        <div class="resource-divider"></div>
+        <div class="resource-stat"><span class="stat-icon cyan">⌁</span><div><span class="resource-label">CLICK POWER</span><strong id="click-power">1 <small>ORE</small></strong></div></div>
+        <div class="resource-divider"></div>
+        <div class="resource-stat"><span class="stat-icon purple">◈</span><div><span class="resource-label">NANITE CORES</span><strong id="core-count">0</strong></div></div>
+        <div class="resource-divider"></div>
+        <div class="resource-stat"><span class="stat-icon gold">⌖</span><div><span class="resource-label">TOTAL MINED</span><strong id="total-mined">0</strong></div></div>
+      </section>
+
+      <section class="game-grid">
+        <div class="left-column">
+          <article class="panel obelisk-panel">
+            <div class="panel-heading"><div><span class="panel-kicker">ACTIVE EXTRACTION SITE</span><h2>Unknown Obelisk</h2></div><span class="status-pill"><span class="live-dot"></span> MINING</span></div>
+            <div class="scene" id="mine-scene">
+              <div class="scene-grid"></div><div class="starfield starfield-one"></div><div class="starfield starfield-two"></div>
+              <div class="orbit orbit-a"></div><div class="orbit orbit-b"></div>
+              <div class="obelisk-wrap" id="mine-button" role="button" tabindex="0" aria-label="Mine the obelisk for stellar ore" title="Click to mine">
+                <div class="obelisk-aura"></div>
+                <svg class="obelisk" viewBox="0 0 170 258" aria-hidden="true">
+                  <defs><linearGradient id="stone" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#354c65"/><stop offset=".48" stop-color="#192c41"/><stop offset="1" stop-color="#101b2a"/></linearGradient><linearGradient id="edge" x1="0" x2="1"><stop stop-color="#8af7ff"/><stop offset="1" stop-color="#9f74ff"/></linearGradient></defs>
+                  <path d="M85 10 143 51 130 218 85 247 40 218 27 51Z" fill="url(#stone)" stroke="#58718b" stroke-width="1.5"/>
+                  <path d="M85 10 85 247 40 218 27 51Z" fill="#253a50" opacity=".8"/>
+                  <path d="M85 10 143 51 130 218 85 247Z" fill="#152537" opacity=".72"/>
+                  <path d="M85 28 116 54 109 197 85 218 61 197 54 54Z" fill="none" stroke="url(#edge)" stroke-width="2" opacity=".8"/>
+                  <path d="m61 91 24-19 24 19-24 19Z" fill="#8af7ff" opacity=".12"/>
+                  <path d="M85 79v57m0 0-19-15m19 15 19-15" fill="none" stroke="#9af8ff" stroke-width="3" stroke-linecap="round" opacity=".9"/>
+                  <circle cx="85" cy="164" r="8" fill="#a687ff" opacity=".75"/><circle cx="85" cy="164" r="17" fill="none" stroke="#a687ff" opacity=".38"/>
+                  <path d="m40 218 45 29 45-29" fill="none" stroke="#75eaf4" opacity=".5"/>
+                </svg>
+                <span class="mine-hint">CLICK TO EXTRACT</span>
+              </div>
+              <div class="scene-caption"><span><i class="caption-dot"></i> ANOMALY STABLE</span><span>DEPTH <b id="depth-label">01</b></span></div>
+              <div id="float-layer" class="float-layer" aria-hidden="true"></div>
+            </div>
+            <div class="mine-footer"><span>HAND MINING YIELDS <b id="tap-yield">+1 ORE</b></span><button class="mine-button" id="mine-action">MINE <span>↗</span></button></div>
+          </article>
+
+          <article class="panel bot-panel">
+            <div class="bot-orb"><span>AI</span><i></i></div>
+            <div class="bot-copy"><div class="bot-title-row"><h3>Progression bot</h3><span class="bot-version">AUTOMATION 1.0</span></div><p id="bot-description">Let your mining protocol make the next best move.</p><div class="bot-state"><span class="live-dot" id="bot-dot"></span><span id="bot-status">STANDBY · AWAITING COMMAND</span></div></div>
+            <button id="bot-toggle" class="bot-toggle" aria-pressed="false"><span class="toggle-knob"></span><span id="toggle-label">ENGAGE BOT</span></button>
+          </article>
+          <div class="log-panel"><div class="log-head"><span>PROTOCOL LOG</span><span class="log-live"><i></i> LIVE</span></div><div id="event-log" class="event-log" aria-live="polite"></div></div>
+        </div>
+
+        <div class="right-column">
+          <article class="panel upgrades-panel">
+            <div class="panel-heading upgrades-heading"><div><span class="panel-kicker">EXPAND YOUR OPERATION</span><h2>Research &amp; upgrades</h2></div><span class="upgrade-count"><b id="upgrade-owned">0</b> / 4</span></div>
+            <div class="upgrade-list" id="upgrade-list"></div>
+          </article>
+          <article class="panel strategy-panel">
+            <div class="strategy-heading"><div><span class="panel-kicker">AUTOPILOT SETTINGS</span><h3>Bot strategy</h3></div><span class="strategy-icon">⌘</span></div>
+            <label class="strategy-select-label" for="bot-strategy">PURCHASE PRIORITY</label>
+            <select id="bot-strategy"><option value="balanced">Balanced growth</option><option value="rate">Max ore / second</option><option value="click">Max click power</option></select>
+            <div class="strategy-note"><span>i</span><p>The bot mines when idle and buys the most efficient affordable upgrade. Your progress is saved on this device.</p></div>
+          </article>
+          <article class="panel milestone-panel">
+            <div class="milestone-head"><div><span class="panel-kicker">NEXT MILESTONE</span><h3 id="milestone-title">First contact</h3></div><span class="milestone-mark">✧</span></div>
+            <div class="milestone-progress"><div class="progress-track"><span id="milestone-progress"></span></div><b id="milestone-percent">0%</b></div>
+            <div class="milestone-foot"><span id="milestone-copy">Mine 100 Stellar Ore</span><span id="milestone-reward">+1 CORE</span></div>
+          </article>
+          <button class="reset-button" id="reset-button"><span>↻</span> RESET RUN <small>RESTART WITH CURRENT CORES</small></button>
+        </div>
+      </section>
+    </main>
+    <footer><span>OBELISK PROTOCOL <b>·</b> SOLO MINING SIMULATION</span><span>ALL SYSTEMS NOMINAL <i class="live-dot"></i></span></footer>
+  </div>
+  <div id="toast" class="toast" role="status"></div>
+  <script src="game.js"></script>
+</body>
+</html>
