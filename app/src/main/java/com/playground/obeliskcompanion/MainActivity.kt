@@ -13,7 +13,7 @@ import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ScrollView
-import android.widget.Switch
+import androidx.appcompat.widget.SwitchCompat
 import android.widget.TextView
 import java.io.File
 import kotlin.math.min
@@ -23,15 +23,16 @@ class MainActivity : Activity() {
     private lateinit var imageHint: TextView
     private lateinit var statusView: TextView
     private lateinit var ocrView: TextView
-    private lateinit var freebieSwitch: Switch
-    private lateinit var prestigeSwitch: Switch
-    private lateinit var manualSwitch: Switch
+    private lateinit var freebieSwitch: SwitchCompat
+    private lateinit var prestigeSwitch: SwitchCompat
+    private lateinit var manualSwitch: SwitchCompat
     private lateinit var cooldownInput: EditText
     private lateinit var multiplierInput: EditText
     private lateinit var minLevelInput: EditText
     private lateinit var minMinutesInput: EditText
     private lateinit var selectedPointView: TextView
     private var selectedPoint = "freebie_menu"
+    private var selectedPointLabel = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -54,90 +55,97 @@ class MainActivity : Activity() {
         val scroll = ScrollView(this)
         scroll.addView(root)
 
-        root.addView(text("OBELISK COMPANION", 24f, true))
-        root.addView(text("On-device helper for Idle Obelisk Miner", 15f))
-        root.addView(text("Unofficial community companion · not affiliated with Checkbox Entertainment.", 12f))
+        root.addView(text(getString(R.string.screen_title), 24f, true))
+        root.addView(text(getString(R.string.screen_subtitle), 15f))
+        root.addView(text(getString(R.string.unofficial_notice), 12f))
 
-        root.addView(section("Connection"))
-        root.addView(text("The accessibility service reads the visible game screen using on-device OCR. It only acts while Idle Obelisk Miner is foregrounded. No screenshots leave this device.", 14f))
-        root.addView(button("Open accessibility settings") {
+        root.addView(section(getString(R.string.section_connection)))
+        root.addView(text(getString(R.string.connection_privacy), 14f))
+        root.addView(button(getString(R.string.open_accessibility_settings)) {
             startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
         })
-        root.addView(button("Open Idle Obelisk Miner") {
+        root.addView(button(getString(R.string.open_game)) {
             val launch = packageManager.getLaunchIntentForPackage(CompanionState.GAME_PACKAGE)
             if (launch != null) startActivity(launch)
-            else statusView.text = "Game not installed. Install the official game first."
+            else statusView.text = getString(R.string.game_not_installed)
         })
 
-        root.addView(section("Automation"))
-        freebieSwitch = Switch(this).apply { text = "Auto-collect Freebie Packs" }
-        prestigeSwitch = Switch(this).apply { text = "Auto-prestige when measured efficiency declines" }
-        manualSwitch = Switch(this).apply { text = "Manual mode (recommend only; never confirm prestige)" }
+        root.addView(section(getString(R.string.section_automation)))
+        freebieSwitch = SwitchCompat(this).apply { text = getString(R.string.switch_freebies) }
+        prestigeSwitch = SwitchCompat(this).apply { text = getString(R.string.switch_prestige) }
+        manualSwitch = SwitchCompat(this).apply { text = getString(R.string.switch_manual) }
         root.addView(freebieSwitch)
         root.addView(prestigeSwitch)
         root.addView(manualSwitch)
         freebieSwitch.setOnCheckedChangeListener { _, checked -> CompanionState.setBool("freebies_enabled", checked) }
         prestigeSwitch.setOnCheckedChangeListener { _, checked -> CompanionState.setBool("prestige_enabled", checked) }
         manualSwitch.setOnCheckedChangeListener { _, checked -> CompanionState.setBool("manual_mode", checked) }
-        root.addView(text("Auto-prestige is off by default. Manual mode is on by default. Prestige confirmation can reset game progress; auto mode requires a separately calibrated point for the prestige screen's continue action and the final irreversible confirmation. Check the preview before enabling it.", 13f))
+        root.addView(text(getString(R.string.prestige_safety_note), 13f))
 
-        root.addView(section("Prestige strategy"))
-        root.addView(text("The advisor uses the game's published prestige-points formula and your observed time per level. It compares current PP/hour with the next five-level estimate, accounting for slowing level-ups. It needs at least three measured level-ups after level 20; it does not read or assume hidden XP values.", 14f))
-        multiplierInput = input("Prestige point multiplier (default 1.0)")
-        minLevelInput = input("Minimum prestige level (at least 20)")
-        minMinutesInput = input("Minimum minutes after reaching level 20 (default 5)")
+        root.addView(section(getString(R.string.section_prestige_strategy)))
+        root.addView(text(getString(R.string.prestige_strategy_info), 14f))
+        multiplierInput = input(getString(R.string.input_pp_multiplier))
+        minLevelInput = input(getString(R.string.input_minimum_level))
+        minMinutesInput = input(getString(R.string.input_minimum_minutes))
         root.addView(multiplierInput)
         root.addView(minLevelInput)
         root.addView(minMinutesInput)
-        root.addView(button("Save strategy settings") { saveSettings() })
+        root.addView(button(getString(R.string.save_strategy_settings)) { saveSettings() })
 
-        root.addView(section("Screen calibration"))
-        root.addView(text("With the game open, the service keeps a private recent screenshot. Return here, choose a point below, then tap that location on the screenshot. Calibrate the relevant points for your device and game layout. Coordinates are normalized, so rotation/resizing may require recalibration.", 14f))
+        root.addView(section(getString(R.string.section_calibration)))
+        root.addView(text(getString(R.string.calibration_instructions), 14f))
         val pointNames = listOf(
-            "freebie_menu" to "Freebie icon/menu",
-            "freebie_claim" to "Claim button",
-            "freebie_close" to "Close Freebie window",
-            "prestige_menu" to "Prestige menu/button",
-            "prestige_continue" to "Prestige screen continue button",
-            "prestige_final_confirm" to "Final irreversible prestige confirmation"
+            "freebie_menu" to R.string.point_label_freebie_menu,
+            "freebie_claim" to R.string.point_label_freebie_claim,
+            "freebie_close" to R.string.point_label_freebie_close,
+            "prestige_menu" to R.string.point_label_prestige_menu,
+            "prestige_continue" to R.string.point_label_prestige_continue,
+            "prestige_final_confirm" to R.string.point_label_prestige_final_confirm
         )
-        pointNames.forEach { (key, label) ->
-            root.addView(button("Set point: $label") {
+        pointNames.forEach { (key, labelResource) ->
+            val label = getString(labelResource)
+            root.addView(button(getString(R.string.set_point_button, label)) {
                 selectedPoint = key
-                selectedPointView.text = "Selected point: $label — tap it in the screenshot below"
+                selectedPointLabel = label
+                selectedPointView.text = getString(R.string.selected_point_prompt, label)
             })
         }
-        selectedPointView = text("Selected point: Freebie icon/menu — tap it in the screenshot below", 13f, true)
+        selectedPointLabel = getString(R.string.point_label_freebie_menu)
+        selectedPointView = text(getString(R.string.selected_point_initial), 13f, true)
         root.addView(selectedPointView)
-        imageHint = text("No game screenshot yet. Open the game and leave the companion service enabled for a few seconds.", 13f)
+        imageHint = text(getString(R.string.screenshot_missing), 13f)
         root.addView(imageHint)
         image = ImageView(this).apply {
             adjustViewBounds = true
             scaleType = ImageView.ScaleType.FIT_CENTER
             setBackgroundColor(0xFF20252B.toInt())
             minimumHeight = dp(260)
-            setOnTouchListener { _, event ->
-                if (event.action == MotionEvent.ACTION_UP) calibrateFromTap(event.x, event.y)
+            contentDescription = getString(R.string.screenshot_accessibility_description)
+            setOnTouchListener { view, event ->
+                if (event.action == MotionEvent.ACTION_UP) {
+                    calibrateFromTap(event.x, event.y)
+                    view.performClick()
+                }
                 true
             }
         }
         root.addView(image, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, dp(520)))
 
-        root.addView(section("Live status"))
-        statusView = text("Waiting for the game screen.", 15f, true)
-        ocrView = text("Recognized text will appear here when the game is foregrounded.", 12f)
+        root.addView(section(getString(R.string.section_live_status)))
+        statusView = text(getString(R.string.waiting_for_game), 15f, true)
+        ocrView = text(getString(R.string.recognized_text_placeholder), 12f)
         root.addView(statusView)
         root.addView(ocrView)
-        root.addView(button("Refresh status and screenshot") { refresh() })
+        root.addView(button(getString(R.string.refresh_status)) { refresh() })
 
-        root.addView(section("Safety and limitations"))
-        root.addView(text("This app uses Android Accessibility only after you explicitly enable its service. It does not access game files, send data, or bypass the game. ADB-free on-device automation requires Android 11 or newer. OCR and fixed screen coordinates can fail when the layout, language, or game version changes; automatic actions remain disabled until you turn them on.", 13f))
+        root.addView(section(getString(R.string.section_safety)))
+        root.addView(text(getString(R.string.safety_limitations), 13f))
         setContentView(scroll)
 
         freebieSwitch.isChecked = CompanionState.bool("freebies_enabled")
         prestigeSwitch.isChecked = CompanionState.bool("prestige_enabled")
         manualSwitch.isChecked = CompanionState.bool("manual_mode", true)
-        cooldownInput = input("Freebie scan interval in minutes (default 10)")
+        cooldownInput = input(getString(R.string.input_freebie_interval))
         // Insert cooldown before strategy controls using the current vertical layout.
         val parent = root
         val automationIndex = parent.indexOfChild(prestigeSwitch)
@@ -162,8 +170,13 @@ class MainActivity : Activity() {
         val x = ((tapX - left) / shownWidth).coerceIn(0f, 1f)
         val y = ((tapY - top) / shownHeight).coerceIn(0f, 1f)
         CompanionState.setPoint(selectedPoint, TapPoint(x, y))
-        selectedPointView.text = "Saved $selectedPoint at ${"%.1f".format(x * 100)}%, ${"%.1f".format(y * 100)}%."
-        CompanionState.status("Calibration saved: $selectedPoint.")
+        selectedPointView.text = getString(
+            R.string.calibration_saved_coordinates,
+            selectedPointLabel,
+            x * 100,
+            y * 100
+        )
+        CompanionState.status(getString(R.string.calibration_saved_status, selectedPointLabel))
     }
 
     private fun saveSettings() {
@@ -175,24 +188,27 @@ class MainActivity : Activity() {
         CompanionState.setText("pp_multiplier", multiplier.toString())
         CompanionState.setText("minimum_prestige_level", minimumLevel.toString())
         CompanionState.setText("minimum_run_minutes", minutes.toString())
-        statusView.text = "Saved. Freebie interval: $cooldown min · PP multiplier: $multiplier · minimum prestige level: $minimumLevel."
+        statusView.text = getString(R.string.settings_saved, cooldown, multiplier, minimumLevel)
     }
 
     private fun refresh() {
         if (!::statusView.isInitialized) return
         statusView.text = CompanionState.status()
-        ocrView.text = "Screen text: ${CompanionState.text("last_ocr", "(none yet)").take(700)}"
+        ocrView.text = getString(
+            R.string.ocr_text,
+            CompanionState.text("last_ocr", getString(R.string.ocr_none_yet)).take(700)
+        )
         val screenshot = File(filesDir, "last_game_screen.png")
         if (screenshot.exists()) {
             val bitmap = BitmapFactory.decodeFile(screenshot.absolutePath)
             image.setImageBitmap(bitmap)
-            imageHint.text = "Latest private screenshot · ${screenshot.length() / 1024} KB. Tap to save the selected coordinate."
+            imageHint.text = getString(R.string.screenshot_available, screenshot.length() / 1024)
         } else {
-            imageHint.text = "No game screenshot yet. Open the game and leave the companion service enabled for a few seconds."
+            imageHint.text = getString(R.string.screenshot_missing)
         }
         val advice = CompanionState.prestigeAdvice()
         if (CompanionState.observedLevel() >= 20) {
-            statusView.text = "${statusView.text}\n${advice.message}"
+            statusView.text = getString(R.string.status_with_advice, statusView.text, advice.message)
         }
     }
 

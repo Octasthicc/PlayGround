@@ -7,7 +7,6 @@ import android.graphics.PixelFormat
 import android.graphics.Point
 import android.graphics.Rect
 import android.hardware.HardwareBuffer
-import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.view.Display
@@ -77,7 +76,7 @@ class GameAccessibilityService : AccessibilityService() {
     }
 
     private fun requestScreenshot() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R || !isGameForeground() || scanInProgress) return
+        if (!isGameForeground() || scanInProgress) return
         scanInProgress = true
         lastScreenshotAt = System.currentTimeMillis()
         takeScreenshot(Display.DEFAULT_DISPLAY, executor, object : TakeScreenshotCallback {
