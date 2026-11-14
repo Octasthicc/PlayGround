@@ -3,107 +3,29 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#090d17">
+  <meta name="theme-color" content="#f4f6f8">
+  <meta name="description" content="An on-device Android companion for Idle Obelisk Miner.">
   <link rel="icon" href="data:,">
-  <title>Obelisk Protocol — Idle Miner</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
+  <title>Obelisk Companion — Idle Obelisk Miner</title>
+  <style>
+    :root{color-scheme:light;--ink:#17212b;--muted:#66727d;--line:#e4e9ed;--paper:#fff;--canvas:#f3f6f7;--teal:#087f72;--teal-soft:#e5f5f1;--amber:#b77821;--amber-soft:#fff5e3;--shadow:0 18px 48px #243a4810}
+    *{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 82% 0,#e4f2ee 0,transparent 32rem),var(--canvas);color:var(--ink);font:15px/1.55 Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}main{max-width:1120px;margin:0 auto;padding:34px 28px 56px}.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:54px}.brand{display:flex;align-items:center;gap:12px;font-size:14px;font-weight:800;letter-spacing:.1em}.brand-mark{display:grid;place-items:center;width:40px;height:40px;border-radius:13px;background:#142b34;color:#b8f1df;font-size:20px}.tag{border:1px solid #dce5e4;border-radius:999px;padding:7px 12px;color:#52706a;background:#ffffffa8;font-size:11px;font-weight:750;letter-spacing:.12em}.hero{max-width:760px;margin:0 0 34px}.eyebrow,.section-label{color:var(--teal);font-size:11px;font-weight:800;letter-spacing:.15em;text-transform:uppercase}.hero h1{max-width:700px;margin:10px 0 14px;font-size:clamp(38px,6vw,67px);line-height:1.04;letter-spacing:-.055em}.hero p{max-width:680px;margin:0;color:var(--muted);font-size:17px}.layout{display:grid;grid-template-columns:1.15fr .85fr;gap:18px}.card{border:1px solid var(--line);border-radius:20px;background:var(--paper);box-shadow:var(--shadow);padding:24px}.card h2{margin:5px 0 8px;font-size:22px;letter-spacing:-.03em}.card p{color:var(--muted);margin:0}.connection{grid-column:1/-1;display:grid;grid-template-columns:1fr auto;align-items:center;gap:22px}.connection-copy{max-width:690px}.status{display:inline-flex;align-items:center;gap:8px;color:#087f72;font-size:11px;font-weight:800;letter-spacing:.11em}.dot{width:8px;height:8px;border-radius:50%;background:#32b68f;box-shadow:0 0 0 4px #e3f6ef}.badge{display:inline-flex;align-items:center;gap:8px;border-radius:12px;padding:12px 15px;background:#f3f8f6;color:#31665d;font-size:12px;font-weight:700}.columns{display:grid;gap:18px}.switch-row{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:14px 0;border-bottom:1px solid #edf0f2}.switch-row:last-child{border-bottom:0}.switch-row strong{display:block;font-size:14px}.switch-row small{display:block;margin-top:3px;color:var(--muted);font-size:12px}.switch{flex:none;width:39px;height:23px;border:1px solid #d9e0e3;border-radius:99px;background:#edf0f2;position:relative}.switch:after{content:"";position:absolute;left:3px;top:3px;width:15px;height:15px;border-radius:50%;background:#fff;box-shadow:0 1px 3px #0002}.switch.on{background:#b9e8d9;border-color:#a6dacb}.switch.on:after{left:19px;background:var(--teal)}.mode-note{margin-top:17px;padding:13px 14px;border-radius:12px;background:var(--amber-soft);color:#79521e;font-size:12px}.steps{display:grid;gap:13px;margin-top:18px}.step{display:grid;grid-template-columns:30px 1fr;gap:11px;align-items:start}.step-no{display:grid;place-items:center;width:29px;height:29px;border-radius:9px;background:var(--teal-soft);color:var(--teal);font-size:12px;font-weight:800}.step strong{font-size:13px}.step p{font-size:12px}.strategy{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;gap:24px}.formula{display:flex;align-items:center;gap:16px;margin-top:16px;padding:16px;border:1px solid #e8eeed;border-radius:14px;background:#f9fbfa}.formula-icon{display:grid;place-items:center;flex:none;width:42px;height:42px;border-radius:12px;background:#e7f5f1;color:var(--teal);font-size:21px}.formula strong{display:block;font-size:14px}.formula small{display:block;color:var(--muted);font-size:12px}.footer{display:flex;justify-content:space-between;gap:20px;margin-top:24px;color:#849098;font-size:11px}.footer strong{color:#607079}.safety{color:#6e572c}
+    @media(max-width:720px){main{padding:20px 16px 36px}.topbar{margin-bottom:38px}.brand{font-size:12px}.tag{font-size:9px;padding:6px 8px}.hero p{font-size:15px}.layout{grid-template-columns:1fr}.connection{grid-column:auto;grid-template-columns:1fr;gap:14px}.connection .badge{justify-self:start}.strategy{grid-column:auto;grid-template-columns:1fr}.card{padding:20px;border-radius:17px}.footer{flex-direction:column;gap:5px}}
+  </style>
 </head>
 <body>
-  <div class="app-shell">
-    <header class="topbar">
-      <a class="brand" href="#" aria-label="Obelisk Protocol home">
-        <span class="brand-mark"><span></span><span></span><span></span></span>
-        <span>OBELISK <b>PROTOCOL</b></span>
-      </a>
-      <div class="top-meta"><span class="live-dot"></span><span>SECTOR 07 · DEEP SPACE</span><span class="separator">/</span><span id="save-status">SAVED LOCALLY</span></div>
-      <button class="icon-button" id="sound-toggle" aria-label="Toggle sound" title="Sound effects">◖</button>
-    </header>
-
-    <main>
-      <section class="intro-row">
-        <div>
-          <div class="eyebrow">INCREMENTAL MINING SIMULATOR <span class="eyebrow-line"></span></div>
-          <h1>The Obelisk <span>won't mine itself.</span></h1>
-        </div>
-        <div class="cycle-pill"><span class="cycle-icon">↻</span><span>RUN <b id="run-number">01</b></span></div>
-      </section>
-
-      <section class="resource-strip" aria-label="Resources">
-        <div class="resource-main">
-          <div class="resource-icon ore-icon">✦</div>
-          <div><div class="resource-label">STELLAR ORE <span class="tiny-tag">PRIMARY</span></div><div class="resource-amount" id="ore-count">0</div></div>
-          <div class="resource-rate"><span class="rate-arrow">↗</span><span id="ore-rate">0</span><small>ORE / SEC</small></div>
-        </div>
-        <div class="resource-divider"></div>
-        <div class="resource-stat"><span class="stat-icon cyan">⌁</span><div><span class="resource-label">CLICK POWER</span><strong id="click-power">1 <small>ORE</small></strong></div></div>
-        <div class="resource-divider"></div>
-        <div class="resource-stat"><span class="stat-icon purple">◈</span><div><span class="resource-label">NANITE CORES</span><strong id="core-count">0</strong></div></div>
-        <div class="resource-divider"></div>
-        <div class="resource-stat"><span class="stat-icon gold">⌖</span><div><span class="resource-label">TOTAL MINED</span><strong id="total-mined">0</strong></div></div>
-      </section>
-
-      <section class="game-grid">
-        <div class="left-column">
-          <article class="panel obelisk-panel">
-            <div class="panel-heading"><div><span class="panel-kicker">ACTIVE EXTRACTION SITE</span><h2>Unknown Obelisk</h2></div><span class="status-pill"><span class="live-dot"></span> MINING</span></div>
-            <div class="scene" id="mine-scene">
-              <div class="scene-grid"></div><div class="starfield starfield-one"></div><div class="starfield starfield-two"></div>
-              <div class="orbit orbit-a"></div><div class="orbit orbit-b"></div>
-              <div class="obelisk-wrap" id="mine-button" role="button" tabindex="0" aria-label="Mine the obelisk for stellar ore" title="Click to mine">
-                <div class="obelisk-aura"></div>
-                <svg class="obelisk" viewBox="0 0 170 258" aria-hidden="true">
-                  <defs><linearGradient id="stone" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#354c65"/><stop offset=".48" stop-color="#192c41"/><stop offset="1" stop-color="#101b2a"/></linearGradient><linearGradient id="edge" x1="0" x2="1"><stop stop-color="#8af7ff"/><stop offset="1" stop-color="#9f74ff"/></linearGradient></defs>
-                  <path d="M85 10 143 51 130 218 85 247 40 218 27 51Z" fill="url(#stone)" stroke="#58718b" stroke-width="1.5"/>
-                  <path d="M85 10 85 247 40 218 27 51Z" fill="#253a50" opacity=".8"/>
-                  <path d="M85 10 143 51 130 218 85 247Z" fill="#152537" opacity=".72"/>
-                  <path d="M85 28 116 54 109 197 85 218 61 197 54 54Z" fill="none" stroke="url(#edge)" stroke-width="2" opacity=".8"/>
-                  <path d="m61 91 24-19 24 19-24 19Z" fill="#8af7ff" opacity=".12"/>
-                  <path d="M85 79v57m0 0-19-15m19 15 19-15" fill="none" stroke="#9af8ff" stroke-width="3" stroke-linecap="round" opacity=".9"/>
-                  <circle cx="85" cy="164" r="8" fill="#a687ff" opacity=".75"/><circle cx="85" cy="164" r="17" fill="none" stroke="#a687ff" opacity=".38"/>
-                  <path d="m40 218 45 29 45-29" fill="none" stroke="#75eaf4" opacity=".5"/>
-                </svg>
-                <span class="mine-hint">CLICK TO EXTRACT</span>
-              </div>
-              <div class="scene-caption"><span><i class="caption-dot"></i> ANOMALY STABLE</span><span>DEPTH <b id="depth-label">01</b></span></div>
-              <div id="float-layer" class="float-layer" aria-hidden="true"></div>
-            </div>
-            <div class="mine-footer"><span>HAND MINING YIELDS <b id="tap-yield">+1 ORE</b></span><button class="mine-button" id="mine-action">MINE <span>↗</span></button></div>
-          </article>
-
-          <article class="panel bot-panel">
-            <div class="bot-orb"><span>AI</span><i></i></div>
-            <div class="bot-copy"><div class="bot-title-row"><h3>Progression bot</h3><span class="bot-version">AUTOMATION 1.0</span></div><p id="bot-description">Let your mining protocol make the next best move.</p><div class="bot-state"><span class="live-dot" id="bot-dot"></span><span id="bot-status">STANDBY · AWAITING COMMAND</span></div></div>
-            <button id="bot-toggle" class="bot-toggle" aria-pressed="false"><span class="toggle-knob"></span><span id="toggle-label">ENGAGE BOT</span></button>
-          </article>
-          <div class="log-panel"><div class="log-head"><span>PROTOCOL LOG</span><span class="log-live"><i></i> LIVE</span></div><div id="event-log" class="event-log" aria-live="polite"></div></div>
-        </div>
-
-        <div class="right-column">
-          <article class="panel upgrades-panel">
-            <div class="panel-heading upgrades-heading"><div><span class="panel-kicker">EXPAND YOUR OPERATION</span><h2>Research &amp; upgrades</h2></div><span class="upgrade-count"><b id="upgrade-owned">0</b> / 4</span></div>
-            <div class="upgrade-list" id="upgrade-list"></div>
-          </article>
-          <article class="panel strategy-panel">
-            <div class="strategy-heading"><div><span class="panel-kicker">AUTOPILOT SETTINGS</span><h3>Bot strategy</h3></div><span class="strategy-icon">⌘</span></div>
-            <label class="strategy-select-label" for="bot-strategy">PURCHASE PRIORITY</label>
-            <select id="bot-strategy"><option value="balanced">Balanced growth</option><option value="rate">Max ore / second</option><option value="click">Max click power</option></select>
-            <div class="strategy-note"><span>i</span><p>The bot mines when idle and buys the most efficient affordable upgrade. Your progress is saved on this device.</p></div>
-          </article>
-          <article class="panel milestone-panel">
-            <div class="milestone-head"><div><span class="panel-kicker">NEXT MILESTONE</span><h3 id="milestone-title">First contact</h3></div><span class="milestone-mark">✧</span></div>
-            <div class="milestone-progress"><div class="progress-track"><span id="milestone-progress"></span></div><b id="milestone-percent">0%</b></div>
-            <div class="milestone-foot"><span id="milestone-copy">Mine 100 Stellar Ore</span><span id="milestone-reward">+1 CORE</span></div>
-          </article>
-          <button class="reset-button" id="reset-button"><span>↻</span> RESET RUN <small>RESTART WITH CURRENT CORES</small></button>
-        </div>
-      </section>
-    </main>
-    <footer><span>OBELISK PROTOCOL <b>·</b> SOLO MINING SIMULATION</span><span>ALL SYSTEMS NOMINAL <i class="live-dot"></i></span></footer>
-  </div>
-  <div id="toast" class="toast" role="status"></div>
-  <script src="game.js"></script>
+  <main id="preview-ready">
+    <header class="topbar"><div class="brand"><span class="brand-mark" aria-hidden="true">⌁</span><span>OBELISK COMPANION</span></div><span class="tag">ANDROID · ON-DEVICE</span></header>
+    <section class="hero"><div class="eyebrow">A careful companion for your next run</div><h1>Mine smarter.<br>Keep the game yours.</h1><p>An unofficial Android helper for Idle Obelisk Miner. It reads only the visible game screen, helps collect Freebie Packs, and estimates a prestige window from your measured progress.</p></section>
+    <section class="layout" aria-label="Companion overview">
+      <article class="card connection"><div class="connection-copy"><span class="status"><i class="dot"></i> PRIVACY-FIRST CONNECTION</span><h2>Your screen stays on your device.</h2><p>On-device OCR observes the game only while it is foregrounded. Screenshots stay in private app storage; no game files are modified and no screen data is uploaded.</p></div><span class="badge"><span aria-hidden="true">◉</span> Accessibility access is opt-in</span></article>
+      <div class="columns">
+        <article class="card"><span class="section-label">Automation</span><h2>You stay in control</h2><p>Automation is optional and disabled until you choose to enable it.</p><div class="switch-row"><div><strong>Freebie Pack helper</strong><small>Scheduled scan and claim flow</small></div><span class="switch" aria-label="Off"></span></div><div class="switch-row"><div><strong>Prestige automation</strong><small>Requires separate safety calibration</small></div><span class="switch" aria-label="Off"></span></div><div class="switch-row"><div><strong>Manual mode</strong><small>Advice only; never confirms prestige</small></div><span class="switch on" aria-label="On"></span></div><div class="mode-note">Prestige confirmation can reset game progress. Manual mode is on by default.</div></article>
+        <article class="card"><span class="section-label">Quick setup</span><h2>Calibrate before use</h2><p>Screen locations depend on your device and game layout.</p><div class="steps"><div class="step"><span class="step-no">01</span><div><strong>Enable the accessibility service</strong><p>Grant permission in Android settings when you are ready.</p></div></div><div class="step"><span class="step-no">02</span><div><strong>Open the game and check the preview</strong><p>Confirm OCR and the latest screen look correct.</p></div></div><div class="step"><span class="step-no">03</span><div><strong>Set each tap point on your screen</strong><p>Recalibrate after rotation or a game update.</p></div></div></div></article>
+      </div>
+      <article class="card strategy"><div><span class="section-label">Prestige strategy</span><h2>Timing based on your run</h2><p>The advisor compares current prestige points per hour with a near-term estimate, using your observed level-up times to account for slowing progress.</p><div class="formula"><span class="formula-icon" aria-hidden="true">↗</span><div><strong>Measured efficiency, not hidden XP</strong><small>Needs at least three observed level-ups after level 20</small></div></div></div><div><span class="section-label">A thoughtful recommendation</span><h2>Estimate, then decide</h2><p>This is guidance—not a promise of an optimal run. Screen recognition and fixed tap coordinates can be inaccurate when language, orientation, or game version changes.</p><div class="mode-note safety">Device testing with the game installed is required before enabling any automatic actions.</div></div></article>
+    </section>
+    <footer class="footer"><span><strong>OBELISK COMPANION</strong> · Unofficial community project, not affiliated with Checkbox Entertainment.</span><span>Android 11+ · Preview of companion features</span></footer>
+  </main>
 </body>
 </html>
