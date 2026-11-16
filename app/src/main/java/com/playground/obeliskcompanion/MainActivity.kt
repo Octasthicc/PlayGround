@@ -22,6 +22,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var image: ImageView
     private lateinit var imageHint: TextView
     private lateinit var statusView: TextView
+    private lateinit var screenView: TextView
     private lateinit var ocrView: TextView
     private lateinit var freebieSwitch: SwitchCompat
     private lateinit var prestigeSwitch: SwitchCompat
@@ -133,8 +134,10 @@ class MainActivity : AppCompatActivity() {
 
         root.addView(section(getString(R.string.section_live_status)))
         statusView = text(getString(R.string.waiting_for_game), 15f, true)
+        screenView = text(getString(R.string.screen_detection_placeholder), 13f)
         ocrView = text(getString(R.string.recognized_text_placeholder), 12f)
         root.addView(statusView)
+        root.addView(screenView)
         root.addView(ocrView)
         root.addView(button(getString(R.string.refresh_status)) { refresh() })
 
@@ -194,6 +197,10 @@ class MainActivity : AppCompatActivity() {
     private fun refresh() {
         if (!::statusView.isInitialized) return
         statusView.text = CompanionState.status()
+        val detectedScreen = CompanionState.text("detected_screen", "")
+        val screenSize = CompanionState.text("screen_size", "")
+        screenView.text = if (detectedScreen.isBlank()) getString(R.string.screen_detection_placeholder)
+            else getString(R.string.screen_detection, detectedScreen, screenSize)
         ocrView.text = getString(
             R.string.ocr_text,
             CompanionState.text("last_ocr", getString(R.string.ocr_none_yet)).take(700)

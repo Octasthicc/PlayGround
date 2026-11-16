@@ -29,9 +29,14 @@ class GameAccessibilityService : AccessibilityService() {
     private var freebiePhase = FreebiePhase.IDLE
     private var prestigePhase = PrestigePhase.IDLE
     private var lastPrestigePromptAt = 0L
+    private var detectedScreen = GameScreen.UNKNOWN
 
     private enum class FreebiePhase { IDLE, OPENING, CLAIMED }
     private enum class PrestigePhase { IDLE, MENU_OPENING, CONFIRMATION_OPENING }
+    private enum class GameScreen(val label: String) {
+        HOME("game"), FREEBIE_MENU("Freebie menu"), PRESTIGE_MENU("Prestige menu"),
+        PRESTIGE_CONFIRMATION("Prestige confirmation"), UNKNOWN("unrecognized screen")
+    }
 
     private val scanLoop = object : Runnable {
         override fun run() {
@@ -102,8 +107,13 @@ class GameAccessibilityService : AccessibilityService() {
                     recognizer.process(image)
                         .addOnSuccessListener(executor) { result ->
                             val fullText = result.text.take(MAX_OCR_CHARS)
+                            val textTargets = result.textBlocks.flatMap { block ->
+                                block.lines.mapNotNull { line ->
+                                    line.boundingBox?.let { bounds -> line.text to Rect(bounds) }
+                                }
+                            }
                             CompanionState.setText("last_ocr", fullText)
-                            processScreenText(fullText, frame.width, frame.height)
+                            processScreenText(fullText, frame.width, frame.height, textTargets)
                         }
                         .addOnFailureListener(executor) {
                             CompanionState.status("Could not read the game screen. Check the game language/layout and calibration.")
@@ -136,21 +146,50 @@ class GameAccessibilityService : AccessibilityService() {
         }
     }
 
-    private fun processScreenText(text: String, width: Int, height: Int) {
+    private fun processScreenText(text: String, width: Int, height: Int, targets: List<Pair<String, Rect>>) {
         if (!isGameForeground()) return
         val level = extractLevel(text)
         if (level != null) CompanionState.observeLevel(level)
+        detectedScreen = classifyScreen(text)
+        CompanionState.setText("detected_screen", detectedScreen.label)
+        CompanionState.setText("screen_size", "${width}×${height}")
 
+        val screenSummary = "${detectedScreen.label} · ${width}×${height}"
         if (CompanionState.observedLevel() >= 20) {
-            CompanionState.status(CompanionState.prestigeAdvice().message)
+            CompanionState.status("$screenSummary. ${CompanionState.prestigeAdvice().message}")
         } else if (text.isNotBlank()) {
-            CompanionState.status("Game screen recognized. ${text.lineSequence().take(3).joinToString(" · ").take(150)}")
+            CompanionState.status("$screenSummary. ${text.lineSequence().take(3).joinToString(" · ").take(130)}")
         } else {
-            CompanionState.status("Game foreground detected; no readable text found yet.")
+            CompanionState.status("$screenSummary. Game foreground detected; no readable text found yet.")
         }
 
-        processFreebies(text, width, height)
-        processPrestige(text, width, height)
+        processFreebies(text, width, height, targets)
+        processPrestige(text, width, height, targets)
+    }
+
+    private fun classifyScreen(text: String): GameScreen {
+        val lower = text.lowercase().replace(Regex("\\s+"), " ")
+        if ("prestige" in lower &&
+            ("are you sure" in lower || "confirm prestige" in lower || "reset your" in lower)) {
+            return GameScreen.PRESTIGE_CONFIRMATION
+        }
+        if (listOf("freebie", "freebies", "free pack", "claim", "collect").any { it in lower }) {
+            return GameScreen.FREEBIE_MENU
+        }
+        if ("prestige" in lower && listOf("confirm", "reset", "gain", "points").any { it in lower }) {
+            return GameScreen.PRESTIGE_MENU
+        }
+        if (extractLevel(text) != null) return GameScreen.HOME
+        return GameScreen.UNKNOWN
+    }
+
+    private fun findTextTarget(targets: List<Pair<String, Rect>>, pattern: Regex): Rect? =
+        targets.firstOrNull { (label, _) -> pattern.matches(label.trim().lowercase()) }?.second
+
+    private fun tapTextTarget(target: Rect?, width: Int, height: Int): Boolean {
+        if (target == null || width <= 0 || height <= 0) return false
+        tap(TapPoint(target.centerX().toFloat() / width, target.centerY().toFloat() / height), width, height)
+        return true
     }
 
     private fun extractLevel(text: String): Int? {
@@ -163,7 +202,7 @@ class GameAccessibilityService : AccessibilityService() {
         }
     }
 
-    private fun processFreebies(text: String, width: Int, height: Int) {
+    private fun processFreebies(text: String, width: Int, height: Int, targets: List<Pair<String, Rect>>) {
         if (!CompanionState.bool("freebies_enabled")) {
             freebiePhase = FreebiePhase.IDLE
             return
@@ -177,21 +216,26 @@ class GameAccessibilityService : AccessibilityService() {
                 val interval = CompanionState.text("freebie_interval_minutes", "10").toLongOrNull()?.coerceIn(1, 1440) ?: 10L
                 val due = now - lastFreebieActionAt >= interval * 60_000L
                 val menu = CompanionState.point("freebie_menu")
-                if (due && menu.isSet && isGameForeground()) {
+                if (due && detectedScreen == GameScreen.FREEBIE_MENU) {
+                    freebiePhase = FreebiePhase.OPENING
+                    lastFreebieActionAt = now - ACTION_SETTLE_MS
+                    CompanionState.status("Freebie menu is already open; checking its claim control.")
+                } else if (due && detectedScreen == GameScreen.HOME && menu.isSet && isGameForeground()) {
                     freebiePhase = FreebiePhase.OPENING
                     lastFreebieActionAt = now
-                    CompanionState.status("Freebie check due; opening the calibrated Freebie Packs area.")
+                    CompanionState.status("Game screen detected; opening the calibrated Freebie Packs control.")
                     tap(menu, width, height)
                 }
             }
             FreebiePhase.OPENING -> {
-                if (packContext && claimContext && now - lastFreebieActionAt >= ACTION_SETTLE_MS) {
+                if (detectedScreen == GameScreen.FREEBIE_MENU && packContext && claimContext && now - lastFreebieActionAt >= ACTION_SETTLE_MS) {
                     val claim = CompanionState.point("freebie_claim")
-                    if (claim.isSet && isGameForeground()) {
+                    val located = findTextTarget(targets, Regex("^(claim|collect)(\\b.*)?$"))
+                    if ((located != null || claim.isSet) && isGameForeground()) {
                         freebiePhase = FreebiePhase.CLAIMED
                         lastFreebieActionAt = now
-                        CompanionState.status("Freebie pack detected; tapping the calibrated claim control.")
-                        tap(claim, width, height)
+                        CompanionState.status("Freebie menu confirmed; tapping its on-screen claim control.")
+                        if (!tapTextTarget(located, width, height)) tap(claim, width, height)
                     }
                 }
                 if (freebiePhase == FreebiePhase.OPENING && now - lastFreebieActionAt > FREEBIE_FLOW_TIMEOUT_MS) {
@@ -212,7 +256,7 @@ class GameAccessibilityService : AccessibilityService() {
         }
     }
 
-    private fun processPrestige(text: String, width: Int, height: Int) {
+    private fun processPrestige(text: String, width: Int, height: Int, targets: List<Pair<String, Rect>>) {
         val enabled = CompanionState.bool("prestige_enabled") && !CompanionState.bool("manual_mode", true)
         if (!enabled) {
             prestigePhase = PrestigePhase.IDLE
@@ -224,23 +268,32 @@ class GameAccessibilityService : AccessibilityService() {
         when (prestigePhase) {
             PrestigePhase.IDLE -> {
                 val menu = CompanionState.point("prestige_menu")
-                if (advice.shouldPrestige && menu.isSet && isGameForeground() && now - lastPrestigePromptAt > PRESTIGE_RETRY_MS) {
-                    prestigePhase = PrestigePhase.MENU_OPENING
-                    lastPrestigePromptAt = now
-                    CompanionState.status("Efficiency threshold reached; opening the calibrated prestige menu for confirmation checks.")
-                    tap(menu, width, height)
+                if (advice.shouldPrestige && now - lastPrestigePromptAt > PRESTIGE_RETRY_MS) {
+                    if (detectedScreen == GameScreen.PRESTIGE_MENU) {
+                        prestigePhase = PrestigePhase.MENU_OPENING
+                        lastPrestigePromptAt = now - ACTION_SETTLE_MS
+                        CompanionState.status("Prestige menu is already open; checking its continue control.")
+                    } else if (detectedScreen == GameScreen.HOME && (menu.isSet || findTextTarget(targets, Regex("^prestige$")) != null) && isGameForeground()) {
+                        prestigePhase = PrestigePhase.MENU_OPENING
+                        lastPrestigePromptAt = now
+                        CompanionState.status("Game screen detected; opening the prestige menu for confirmation checks.")
+                        val located = findTextTarget(targets, Regex("^prestige$"))
+                        if (!tapTextTarget(located, width, height)) tap(menu, width, height)
+                    }
                 }
             }
             PrestigePhase.MENU_OPENING -> {
-                val menuRecognized = now - lastPrestigePromptAt >= ACTION_SETTLE_MS && "prestige" in lower &&
+                val menuRecognized = now - lastPrestigePromptAt >= ACTION_SETTLE_MS &&
+                    detectedScreen == GameScreen.PRESTIGE_MENU && "prestige" in lower &&
                     listOf("confirm", "reset", "gain").any { it in lower }
                 if (menuRecognized) {
                     val continuePoint = CompanionState.point("prestige_continue")
-                    if (continuePoint.isSet && isGameForeground()) {
+                    val located = findTextTarget(targets, Regex("^(continue|confirm|gain prestige)$"))
+                    if ((located != null || continuePoint.isSet) && isGameForeground()) {
                         prestigePhase = PrestigePhase.CONFIRMATION_OPENING
                         lastPrestigePromptAt = now
-                        CompanionState.status("Prestige screen recognized; checking for an explicit irreversible confirmation prompt.")
-                        tap(continuePoint, width, height)
+                        CompanionState.status("Prestige menu recognized; advancing to check for a separate explicit confirmation.")
+                        if (!tapTextTarget(located, width, height)) tap(continuePoint, width, height)
                     }
                 }
                 if (prestigePhase == PrestigePhase.MENU_OPENING && now - lastPrestigePromptAt > PRESTIGE_FLOW_TIMEOUT_MS) {
@@ -249,16 +302,15 @@ class GameAccessibilityService : AccessibilityService() {
                 }
             }
             PrestigePhase.CONFIRMATION_OPENING -> {
-                val explicitConfirmation = "prestige" in lower &&
-                    ("are you sure" in lower || "confirm prestige" in lower || "reset your" in lower)
+                val explicitConfirmation = detectedScreen == GameScreen.PRESTIGE_CONFIRMATION
                 if (explicitConfirmation && now - lastPrestigePromptAt >= ACTION_SETTLE_MS) {
-                    // A separately calibrated final point is required before any irreversible action.
                     val finalConfirm = CompanionState.point("prestige_final_confirm")
-                    if (finalConfirm.isSet && isGameForeground()) {
+                    val located = findTextTarget(targets, Regex("^(confirm|confirm prestige)$"))
+                    if ((located != null || finalConfirm.isSet) && isGameForeground()) {
                         prestigePhase = PrestigePhase.IDLE
                         lastPrestigePromptAt = now
-                        CompanionState.status("Explicit prestige confirmation recognized; completing the separately calibrated final tap.")
-                        tap(finalConfirm, width, height)
+                        CompanionState.status("Explicit prestige confirmation screen recognized; tapping its confirm control.")
+                        if (!tapTextTarget(located, width, height)) tap(finalConfirm, width, height)
                     }
                 }
                 if (prestigePhase == PrestigePhase.CONFIRMATION_OPENING && now - lastPrestigePromptAt > PRESTIGE_FLOW_TIMEOUT_MS) {

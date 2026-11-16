@@ -23,7 +23,7 @@
     <string name="open_accessibility_settings">Open accessibility settings</string>
     <string name="open_game">Open Idle Obelisk Miner</string>
     <string name="section_automation">Automation</string>
-    <string name="prestige_safety_note">Auto-prestige is off by default. Manual mode is on by default. Prestige confirmation can reset game progress; auto mode requires a separately calibrated point for the prestige screen\'s continue action and the final irreversible confirmation. Check the preview before enabling it.</string>
+    <string name="prestige_safety_note">Auto-prestige is off by default. Manual mode is on by default. Prestige confirmation can reset game progress; automatic flow requires a recognized prestige menu, then a distinct explicit confirmation screen and a readable Confirm label or calibrated final point. Check the preview before enabling it.</string>
     <string name="section_prestige_strategy">Prestige strategy</string>
     <string name="prestige_strategy_info">The advisor uses the game\'s published prestige-points formula and your observed time per level. It compares current PP/hour with the next five-level estimate, accounting for slowing level-ups. It needs at least three measured level-ups after level 20; it does not read or assume hidden XP values.</string>
     <string name="input_pp_multiplier">Prestige point multiplier (default 1.0)</string>
@@ -31,10 +31,12 @@
     <string name="input_minimum_minutes">Minimum minutes after reaching level 20 (default 5)</string>
     <string name="save_strategy_settings">Save strategy settings</string>
     <string name="section_calibration">Screen calibration</string>
-    <string name="calibration_instructions">With the game open, the service keeps a private recent screenshot. Return here, choose a point below, then tap that location on the screenshot. Calibrate the relevant points for your device and game layout. Coordinates are normalized, so rotation/resizing may require recalibration.</string>
+    <string name="calibration_instructions">With the game open, the service keeps a private recent screenshot and reports its pixel size and detected menu. It can locate readable Claim, Continue, and Confirm labels directly from OCR; use calibration for unlabeled icons, close buttons, and controls OCR cannot find. Tap each selected point on the screenshot. Coordinates scale to the captured screen size, but recalibrate after major layout or orientation changes.</string>
     <string name="section_live_status">Live status</string>
     <string name="waiting_for_game">Waiting for the game screen.</string>
     <string name="recognized_text_placeholder">Recognized text will appear here when the game is foregrounded.</string>
+    <string name="screen_detection_placeholder">Detected game screen and captured resolution will appear here.</string>
+    <string name="screen_detection">Detected screen: %1$s · screenshot size: %2$s px</string>
     <string name="refresh_status">Refresh status and screenshot</string>
     <string name="section_safety">Safety and limitations</string>
     <string name="safety_limitations">This app uses Android Accessibility only after you explicitly enable its service. It does not access game files, send data, or bypass the game. ADB-free on-device automation requires Android 11 or newer. OCR and fixed screen coordinates can fail when the layout, language, or game version changes; automatic actions remain disabled until you turn them on.</string>
