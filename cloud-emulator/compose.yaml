@@ -6,11 +6,16 @@ services:
     environment:
       EMULATOR_DEVICE: "Samsung Galaxy S10"
       WEB_VNC: "true"
+      # Appium is reachable only inside this container and via the VM's loopback port below.
+      APPIUM: "true"
+      APPIUM_ADDITIONAL_ARGS: "--address 0.0.0.0 --port 4723 --base-path /wd/hub"
     devices:
       - /dev/kvm:/dev/kvm
     ports:
       # Keep the noVNC web UI on the VM's loopback interface only.
       - "127.0.0.1:6080:6080"
+      # Appium is loopback-only on the VM; reach it through SSH port forwarding.
+      - "127.0.0.1:4723:4723"
     volumes:
       # Retains the emulator's Android user data across container recreation.
       - android-home:/home/androidusr

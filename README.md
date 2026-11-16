@@ -66,6 +66,38 @@ ssh -N -L 6080:127.0.0.1:6080 <ssh-user>@<vm-address>
 
 Then visit `http://127.0.0.1:6080` locally. Keep the tunnel open while using the emulator. Restrict VM SSH access to your trusted IP/VPN, use SSH keys and normal host updates, and do not expose the Docker daemon or emulator ADB. Anyone who can reach the browser UI can control the emulator.
 
+### Appium automation (experimental)
+
+The Compose example enables Appium in the container and publishes its port on VM loopback only. Appium listens on the container interface so Docker can forward requests; do not bind this port to a public host interface. To access Appium from a trusted workstation, include it in the SSH tunnel:
+
+```sh
+ssh -N -L 6080:127.0.0.1:6080 -L 4723:127.0.0.1:4723 <ssh-user>@<vm-address>
+```
+
+The endpoint is `http://127.0.0.1:4723/wd/hub`. Verify availability with `curl http://127.0.0.1:4723/wd/hub/status`. The emulator image already includes the UIAutomator2 Appium driver in the current setup, but image updates may change that. Use the included `cloud-emulator/appium_runner.py` for a status check, accessible hierarchy inspection, screenshot, or a single coordinate tap. Review the screenshot before a tap; `tap` requires an explicit `--confirm-tap` flag and does not retry or chain actions. The helper is deliberately not a gameplay bot.
+
+Install the client library in a local virtual environment on the trusted machine that will run the helper (either the VM or your workstation):
+
+```sh
+python3 -m venv .venv-appium
+. .venv-appium/bin/activate
+python -m pip install Appium-Python-Client
+```
+
+Run from the repository directory while the SSH tunnel is open:
+
+```sh
+python cloud-emulator/appium_runner.py status
+python cloud-emulator/appium_runner.py --package com.google.android.apps.nexuslauncher --activity .NexusLauncherActivity inspect
+python cloud-emulator/appium_runner.py screenshot /tmp/emulator.png
+# One deliberate action, only after reviewing the screenshot:
+python cloud-emulator/appium_runner.py --package com.example.app --activity .MainActivity tap 500 900 --confirm-tap
+```
+
+Use UIAutomator2 capabilities with `platformName=Android`, `appium:automationName=UiAutomator2`, and `appium:udid=emulator-5554`. A basic session against the launcher is a useful health check before automating a game that has actually been installed and signed in. Appium's UI hierarchy can omit game-rendered controls, in which case accessibility-based element lookup will not work; use screenshots and conservative, explicitly configured coordinate actions only after visual validation. Do not automate sign-in, purchases, or prestige/other irreversible confirmations unattended. Keep Appium access private: a client with access can control apps and account data on the emulator.
+
+After container recreation, the included helper was verified against the launcher: Appium status, UI hierarchy inspection, and screenshot capture all succeeded. The Compose-managed service restarted with the emulator data volume retained. This does **not** verify the game, save restoration, tap actions, or unattended gameplay. Keep any container-side client packages under `/home/androidusr` (the persistent volume).
+
 ### Game, account, and data considerations
 
 Once the emulator is running, install Idle Obelisk Miner only through a legitimate source available to you; availability in this image and compatibility with the emulator are unknown. Verify gameplay and the companion's accessibility/OCR behavior yourself before relying on them. If you sign in, understand the game's account and cloud-save/restore behavior first: a local emulator volume does not guarantee game progress is backed up or restorable. Treat the emulator volume and backups as sensitive because they may contain account sessions, app data, screenshots, and other personal information. Restrict host access, encrypt VM disks/backups where your provider supports it, and remove sign-in data before sharing or disposing of the VM.
