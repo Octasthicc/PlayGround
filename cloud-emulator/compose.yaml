@@ -1,0 +1,20 @@
+services:
+  android:
+    image: budtmo/docker-android:emulator_11.0
+    container_name: obelisk-android
+    restart: unless-stopped
+    environment:
+      EMULATOR_DEVICE: "Samsung Galaxy S10"
+      WEB_VNC: "true"
+    devices:
+      - /dev/kvm:/dev/kvm
+    ports:
+      # Keep the noVNC web UI on the VM's loopback interface only.
+      - "127.0.0.1:6080:6080"
+    volumes:
+      # Retains the emulator's Android user data across container recreation.
+      - android-home:/home/androidusr
+    shm_size: 2gb
+
+volumes:
+  android-home:
