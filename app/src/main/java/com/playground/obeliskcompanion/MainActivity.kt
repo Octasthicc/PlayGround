@@ -1,7 +1,7 @@
 package com.playground.obeliskcompanion
 
-import android.app.Activity
 import android.content.Intent
+import androidx.appcompat.app.AppCompatActivity
 import android.graphics.BitmapFactory
 import android.graphics.drawable.Drawable
 import android.os.Bundle
@@ -18,7 +18,7 @@ import android.widget.TextView
 import java.io.File
 import kotlin.math.min
 
-class MainActivity : Activity() {
+class MainActivity : AppCompatActivity() {
     private lateinit var image: ImageView
     private lateinit var imageHint: TextView
     private lateinit var statusView: TextView
